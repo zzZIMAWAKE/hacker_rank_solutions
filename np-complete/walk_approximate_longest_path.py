@@ -40,9 +40,13 @@ while True:
         break
     city_one = int(inputs[i][0])
     city_two = int(inputs[i][1])
-    if city_one not in paths:
+    try:
+        paths[city_one]
+    except:
         paths[city_one] = []
-    if city_two not in paths:
+    try:
+        paths[city_two]
+    except:
         paths[city_two] = []
     paths[city_one].append(city_two)
     paths[city_two].append(city_one)
@@ -80,13 +84,13 @@ def random_neighbour_strategy(paths, lowest_indices):
     must_visit = construct_must_visit()
     i = 0
     while True:
-        if i >= 600:
+        if i >= 200:
             break
-        if i <= 10:
+        if i <= 5:
             start = find_start_by_lowest_count(lowest_indices)
-        if i > 10 and i < 100:
+        if i > 5 and i < 10:
             start = find_start_randomly(paths)
-        if i >= 100:
+        if i >= 10:
             start = best_start
         total_moves, order = travel(must_visit, paths, 0, [], start)
         if best_moves < total_moves:
