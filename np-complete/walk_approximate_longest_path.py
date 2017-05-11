@@ -1,6 +1,7 @@
 import sys
 from random import randint
 
+# https://www.hackerrank.com/challenges/walking-the-approximate-longest-path
 # Currently scores 49.0/70.0 consistently, passes up to test case #15
 # I think to improve this further we need to improve performance so that we can pass the last 5 test cases
 # Currently they timeout.
