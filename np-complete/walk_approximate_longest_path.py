@@ -39,6 +39,7 @@ def construct_must_visit():
         i += 1
     return must_visit
 
+
 i = 1
 while True:
     if i > num_roads:
@@ -73,14 +74,19 @@ def travel(must_visit, paths, total_moves, order, start, sum_time, its, max_time
     if not visitable:
         return total_moves, order
 
-    random = randint(0, len(visitable) - 1)
-    best_choice = 10000
-    choice = 0
+    best_choice = 100000
+    choices = []
     for i in visitable:
         if len(paths[i]) < best_choice:
             best_choice = len(paths[i])
-            choice = i
-    return travel(must_visit, paths, total_moves, order, choice, sum_time, its, max_time)
+            choices = []
+            choices.append(i)
+        if len(paths[i]) == best_choice:
+            choices.append(i)
+
+    random = randint(0, len(choices) - 1)
+
+    return travel(must_visit, paths, total_moves, order, choices[random], sum_time, its, max_time)
 
 
 def find_start_randomly(paths):
@@ -105,12 +111,18 @@ def random_neighbour_strategy(paths, lowest_indices, sum_time, its, max_time):
             break
         if i >= 200:
             break
-        start = find_start_by_lowest_count(lowest_indices)
+        if i <= 5:
+            start = find_start_by_lowest_count(lowest_indices)
+        if i > 5 and i < 10:
+            start = find_start_randomly(paths)
+        if i >= 10:
+            start = best_start
         total_moves, order = travel(must_visit, paths, 0, [], start, sum_time, its, max_time)
         if best_moves < total_moves:
             best_moves = total_moves
             best_order = order
-        i+= 1
+            best_start = start
+        i += 1
     return best_moves, best_order
 
 
