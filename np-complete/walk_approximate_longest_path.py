@@ -1,16 +1,8 @@
 import sys
-import time
 from random import randint
 
 # https://www.hackerrank.com/challenges/walking-the-approximate-longest-path
 # Currently scores 66.5/70 consistently, passes all test cases
-# The solution of setrecursionlimit is hacky and I should really improve the way this is written.
-max_time = 10
-its = 0
-sum_time = 0
-start_time = time.time()
-sys.setrecursionlimit(900000)
-
 inputs = []
 for line in sys.stdin:
     inputs.append(line.split(' '))
@@ -27,18 +19,6 @@ while True:
     cities.append(i)
     i += 1
 paths = {}
-
-
-def construct_must_visit():
-    i = 1
-    must_visit = []
-    while True:
-        if i >= num_cities + 1:
-            break
-        must_visit.append(i)
-        i += 1
-    return must_visit
-
 
 i = 1
 while True:
@@ -61,36 +41,29 @@ while True:
     i += 1
 
 
-def travel(must_visit, paths, total_moves, order, start, sum_time, its, max_time):
-    sum_time = time.time() - start_time
-    its += 1
-    if sum_time + (sum_time / its * 2) > max_time:
-        return total_moves, order
-    total_moves += 1
-    order.append(start)
-    if not paths[start] or not must_visit:
-        return total_moves, order
-    visitable = list(set(paths[start]) - set(order))
-    if not visitable:
-        return total_moves, order
+def travel(paths, total_moves, order, start):
+    while True:
+        total_moves += 1
+        order.append(start)
+        if not paths[start]:
+            break
+        visitable = list(set(paths[start]) - set(order))
+        if not visitable:
+            break
 
-    best_choice = 100000
-    choices = []
-    for i in visitable:
-        if len(paths[i]) < best_choice:
-            best_choice = len(paths[i])
-            choices = []
-            choices.append(i)
-        if len(paths[i]) == best_choice:
-            choices.append(i)
+        best_choice = 100000
+        choices = []
+        for i in visitable:
+            if len(paths[i]) < best_choice:
+                best_choice = len(paths[i])
+                choices = []
+                choices.append(i)
+            if len(paths[i]) == best_choice:
+                choices.append(i)
 
-    random = randint(0, len(choices) - 1)
-
-    return travel(must_visit, paths, total_moves, order, choices[random], sum_time, its, max_time)
-
-
-def find_start_randomly(paths):
-    return randint(1, len(paths) - 1)
+        random = randint(0, len(choices) - 1)
+        start = choices[random]
+    return total_moves, order
 
 
 def find_start_by_lowest_count(lowest_indices):
@@ -98,33 +71,13 @@ def find_start_by_lowest_count(lowest_indices):
     return lowest_indices[random_index]
 
 
-def random_neighbour_strategy(paths, lowest_indices, sum_time, its, max_time):
-    best_moves = 0
-    best_order = 0
-    best_start = 0
-    must_visit = construct_must_visit()
-    i = 0
-    while True:
-        sum_time = time.time() - start_time
-        its += 1
-        if sum_time + (sum_time / its * 2) > max_time:
-            break
-        if i >= 200:
-            break
-        if i <= 5:
-            start = find_start_by_lowest_count(lowest_indices)
-        if i > 5 and i < 10:
-            start = find_start_randomly(paths)
-        if i >= 10:
-            start = best_start
-        total_moves, order = travel(must_visit, paths, 0, [], start, sum_time, its, max_time)
-        if best_moves < total_moves:
-            best_moves = total_moves
-            best_order = order
-            best_start = start
-        i += 1
-    return best_moves, best_order
+def find_start_randomly(num_cities):
+    return randint(1, num_cities)
 
+
+def random_neighbour_strategy(paths, start):
+    total_moves, order = travel(paths, 0, [], start)
+    return total_moves, order
 
 i = 1
 lowest = len(paths[1])
@@ -144,6 +97,19 @@ while True:
 
 total_moves = 0
 order = []
-total_moves, order = random_neighbour_strategy(paths, lowest_indices, sum_time, its, max_time)
-print(total_moves)
-print(' '.join(str(i) for i in order))
+i = 0
+best_moves = 0
+best_order = []
+while True:
+    if i > 4:
+        break
+    start = find_start_by_lowest_count(lowest_indices)
+    total_moves, order = random_neighbour_strategy(paths, start)
+    if total_moves > best_moves:
+        best_order = order
+        best_moves = total_moves
+    i += 1
+
+
+print(best_moves)
+print(' '.join(str(i) for i in best_order))
